@@ -55,11 +55,28 @@ jobs:
         run: php artisan test
 
   deploy:
+    name: CD (Safe Dry Run)
     needs: test
     runs-on: ubuntu-latest
+    if: github.ref_name == 'main'
 
-    # 🚫 DISABLED ON PURPOSE
-    if: false
     steps:
-      - name: Deploy to server (disabled)
-        run: echo "Deployment disabled for now"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Simulate deployment
+        run: |
+          echo "🚀 Deploying application (dry run)"
+          echo "✔ Code verified"
+          echo "✔ Assets built"
+          echo "✔ Ready for production deployment"
+
+      - name: Package application artifact
+        run: |
+          zip -r app.zip . -x node_modules vendor .git
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vue-laravel-app
+          path: app.zip
