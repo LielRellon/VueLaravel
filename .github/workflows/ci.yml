@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Get your code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup PHP
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: mbstring, pdo, pdo_sqlite
+          coverage: none
+
+      # 3️⃣ Install backend dependencies
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      # 4️⃣ Prepare Laravel environment
+      - name: Setup Laravel environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          touch database/database.sqlite
+          php artisan migrate --force
+
+      # 5️⃣ Run backend tests
+      - name: Run Laravel tests
+        run: php artisan test
+
+      # 6️⃣ Setup Node
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 7️⃣ Install frontend dependencies
+      - name: Install npm dependencies
+        run: npm install
+
+      # 8️⃣ Build frontend
+      - name: Build frontend
+        run: npm run build
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
+    # 🚫 DISABLED ON PURPOSE
+    if: false
+
+    steps:
+      - name: Deploy to server (disabled)
+        run: echo "Deployment disabled for now"
