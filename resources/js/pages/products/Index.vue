@@ -3,7 +3,6 @@ import Button from '@/components/ui/button/Button.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/vue3';
-import Missing from '@/components/DoesNotExist.vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -11,9 +10,6 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/products',
     },
 ];
-
-const x: number = "this will fail";
-const broken = ;
 </script>
 
 <template>
