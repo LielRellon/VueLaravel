@@ -14,19 +14,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup PHP
+      # 2️⃣ Setup PHP with cache
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.4
           extensions: mbstring, pdo, pdo_sqlite
           coverage: none
+          cache: composer
 
-      # 3️⃣ Setup Node (Moved Up)
+      # 3️⃣ Setup Node with cache
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       # 4️⃣ Install backend dependencies
       - name: Install Composer dependencies
