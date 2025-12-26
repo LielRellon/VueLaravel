@@ -22,11 +22,25 @@ jobs:
           extensions: mbstring, pdo, pdo_sqlite
           coverage: none
 
-      # 3️⃣ Install backend dependencies
+      # 3️⃣ Setup Node (Moved Up)
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 4️⃣ Install backend dependencies
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist
 
-      # 4️⃣ Prepare Laravel environment
+      # 5️⃣ Install frontend dependencies (Moved Up)
+      - name: Install npm dependencies
+        run: npm install
+
+      # 6️⃣ Build frontend (Moved Up - This creates the manifest.json)
+      - name: Build frontend
+        run: npm run build
+
+      # 7️⃣ Prepare Laravel environment
       - name: Setup Laravel environment
         run: |
           cp .env.example .env
@@ -34,23 +48,9 @@ jobs:
           touch database/database.sqlite
           php artisan migrate --force
 
-      # 5️⃣ Run backend tests
+      # 8️⃣ Run backend tests (Now has access to the built assets)
       - name: Run Laravel tests
         run: php artisan test
-
-      # 6️⃣ Setup Node
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      # 7️⃣ Install frontend dependencies
-      - name: Install npm dependencies
-        run: npm install
-
-      # 8️⃣ Build frontend
-      - name: Build frontend
-        run: npm run build
 
   deploy:
     needs: test
@@ -58,7 +58,6 @@ jobs:
 
     # 🚫 DISABLED ON PURPOSE
     if: false
-
     steps:
       - name: Deploy to server (disabled)
         run: echo "Deployment disabled for now"
