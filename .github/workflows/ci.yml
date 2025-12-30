@@ -75,12 +75,15 @@ jobs:
       - name: Setup Laravel environment
         run: |
           cp .env.example .env
+
+          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
+          sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_PORT=.*/DB_PORT=3306/' .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=laravel/' .env
+          sed -i 's/DB_USERNAME=.*/DB_USERNAME=laravel/' .env
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=secret/' .env
+
           php artisan key:generate
-          php artisan config:set database.default mysql
-          php artisan config:set database.connections.mysql.host 127.0.0.1
-          php artisan config:set database.connections.mysql.database laravel
-          php artisan config:set database.connections.mysql.username laravel
-          php artisan config:set database.connections.mysql.password secret
           until mysqladmin ping -h 127.0.0.1 --silent; do
             sleep 1
           done
