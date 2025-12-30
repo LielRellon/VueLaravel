@@ -8,9 +8,24 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: laravel
+          MYSQL_USER: laravel
+          MYSQL_PASSWORD: secret
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
-      - name: Debug GitHub context
+      - name: Debug GitHub context before checkout
         run: |
           echo "ref: ${{ github.ref }}"
           echo "ref_name: ${{ github.ref_name }}"
@@ -21,12 +36,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Debug GitHub context after checkout
+        run: |
+          echo "ref: ${{ github.ref }}"
+          echo "ref_name: ${{ github.ref_name }}"
+          echo "event: ${{ github.event_name }}"
+          echo "actor: ${{ github.actor }}"
+
       # 2️⃣ Setup PHP with cache
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.4
-          extensions: mbstring, pdo, pdo_sqlite
+          extensions: mbstring, pdo, pdo_mysql
           coverage: none
           cache: composer
 
@@ -54,7 +76,14 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
-          touch database/database.sqlite
+          php artisan config:set database.default mysql
+          php artisan config:set database.connections.mysql.host 127.0.0.1
+          php artisan config:set database.connections.mysql.database laravel
+          php artisan config:set database.connections.mysql.username laravel
+          php artisan config:set database.connections.mysql.password secret
+          until mysqladmin ping -h 127.0.0.1 --silent; do
+            sleep 1
+          done
           php artisan migrate --force
 
       # 8️⃣ Run backend tests (Now has access to the built assets)
@@ -87,6 +116,12 @@ jobs:
         with:
           name: vue-laravel-app
           path: app.zip
+
+      - name: Rollback strategy (simulation)
+        if: failure()
+        run: |
+          echo "❌ Deployment failed"
+          echo "↩ Rolling back to previous artifact"
 
   docker:
     name: Build Docker Image
