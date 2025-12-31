@@ -85,9 +85,10 @@ jobs:
           DB_DATABASE: laravel
           DB_USERNAME: laravel
           DB_PASSWORD: secret
+          APP_KEY: base64:Qxsxhh3lcO0aHbN1XoYmSprgGl0WQB3/n5Pda7eveL8=
         run: |
           cp .env.example .env
-          php artisan key:generate
+          # php artisan key:generate  # No need to generate a key if you provide it above
           php artisan config:clear
           php artisan migrate --force
           php artisan test
