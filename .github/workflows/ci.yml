@@ -85,10 +85,12 @@ jobs:
           DB_DATABASE: laravel
           DB_USERNAME: laravel
           DB_PASSWORD: secret
+          # This backup ensures the migration works
           APP_KEY: base64:Qxsxhh3lcO0aHbN1XoYmSprgGl0WQB3/n5Pda7eveL8=
         run: |
           cp .env.example .env
-          # php artisan key:generate  # No need to generate a key if you provide it above
+          # FORCE the key into the .env file so the test process can find it
+          sed -i "s|APP_KEY=|APP_KEY=$APP_KEY|" .env
           php artisan config:clear
           php artisan migrate --force
           php artisan test
