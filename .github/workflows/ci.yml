@@ -86,11 +86,11 @@ jobs:
           DB_USERNAME: laravel
           DB_PASSWORD: secret
         run: |
-          cp .env.testing .env
+          cp .env.example .env
           php artisan key:generate
           php artisan config:clear
-          php artisan migrate --env=testing --force
-          php artisan test --env=testing
+          php artisan migrate --force
+          php artisan test
 
   cd-deploy:
     name: CD (Safe Dry Run)
